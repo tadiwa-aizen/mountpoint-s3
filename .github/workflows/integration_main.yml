@@ -22,6 +22,6 @@ jobs:
   integration:
     if: github.event_name != 'schedule' || github.repository == 'awslabs/mountpoint-s3'
     name: Integration
-    uses: ./.github/workflows/integration.yml
+    uses: ./.github/workflows/integration-codebuild.yml
     with:
       ref: ${{ github.sha }}

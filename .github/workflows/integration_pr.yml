@@ -2,6 +2,10 @@ name: Integration tests (PR)
 
 on:
   pull_request_target:
+    paths-ignore:
+      - '**.md'
+      - 'doc/**'
+      - 'benchmark_website/**'
 
 permissions:
   id-token: write
@@ -10,7 +14,7 @@ permissions:
 jobs:
   integration:
     name: Integration
-    uses: ./.github/workflows/integration.yml
+    uses: ./.github/workflows/integration-codebuild.yml
     with:
       environment: PR integration tests
       ref: ${{ github.event.pull_request.head.sha }}
