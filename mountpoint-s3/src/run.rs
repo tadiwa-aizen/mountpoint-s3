@@ -88,6 +88,8 @@ where
                         drop(pipe_file);
                         tracing::trace!("message sent back to parent process");
 
+                        //A test commnd for jsut vibes ngl
+
                         // Logging is set up and the mount succeeded, so we can hang up
                         // stdin/out/err now to cleanly daemonize ourselves
                         nix::unistd::close(std::io::stdin().as_raw_fd()).context("couldn't close stdin")?;
