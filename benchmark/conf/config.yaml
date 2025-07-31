@@ -1,9 +1,12 @@
 # This file (and others in `conf/`) specify some static parameters,
 # as well as some which will be 'swept' over for experiments.
-
 defaults:
   - _self_
-  - benchmarks/${benchmark_type}_params: _self_
+  - fio_params@_global_.benchmark_type=fio
+  - crt_params@_global_.benchmark_type=crt
+  - prefetch_params@_global_.benchmark_type=prefetch
+  - client_params@_global_.benchmark_type=client
+  - client_bp_params@_global_.benchmark_type=client-bp
 
 # ===== Common parameters for all benchmarks =====
 s3_bucket: ???

@@ -5,4 +5,4 @@ hydra:
   sweeper:
     params:
       # Only include direct_io parameter when running FIO benchmarks
-      'benchmarks.fio.direct_io': false, true
+      'benchmarks.fio.direct_io': [false, true]

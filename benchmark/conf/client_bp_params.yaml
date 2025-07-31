@@ -5,4 +5,4 @@ hydra:
   sweeper:
     params:
       # Include read window size parameters when running Client-BP benchmarks
-      'benchmarks.client_backpressure.read_window_size': 8388608, 2147483648  # 8MB, 2GB
+      'benchmarks.client_backpressure.read_window_size': [8388608, 2147483648]  # 8MB, 2GB
