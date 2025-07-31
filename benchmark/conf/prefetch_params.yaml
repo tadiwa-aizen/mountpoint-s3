@@ -1,0 +1,8 @@
+# Sweeper parameters specific to Prefetch benchmarks
+# This file is automatically included when benchmark_type=prefetch
+
+hydra:
+  sweeper:
+    params:
+      # Include memory target parameters when running Prefetch benchmarks
+      'benchmarks.prefetch.max_memory_target': !!null, 1073741824, 2147483648  # null, 1GB, 2GB

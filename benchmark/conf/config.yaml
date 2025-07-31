@@ -3,6 +3,7 @@
 
 defaults:
   - _self_
+  - benchmarks/${benchmark_type}_params: _self_
 
 # ===== Common parameters for all benchmarks =====
 s3_bucket: ???
@@ -70,12 +71,9 @@ hydra:
   job:
     chdir: true
   sweeper:
-    # Global sweeper params - use this for common parameters across all benchmarks
-    # For specific parameter use sweep params under the specific benchmark type config
+    # Common parameters that apply to all benchmark types
     params:
       'application_workers': 1, 4, 16, 64, 128
       'iteration': "range(${iterations})"
       'mountpoint.fuse_threads': 1, 16, 64
-      'benchmarks.fio.direct_io': false, true
-      # 'benchmarks.prefetch.max_memory_target': !!null, 1073741824, 2147483648  # null, 1GB, 2GB
-      #'benchmarks.client_backpressure.read_window_size': 8388608, 2147483648
+      # Benchmark-specific parameters moved to separate config files

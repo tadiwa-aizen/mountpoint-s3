@@ -1,0 +1,7 @@
+# Sweeper parameters specific to Client benchmarks
+# This file is automatically included when benchmark_type=client
+
+hydra:
+  sweeper:
+    params:
+      # No specific parameters for Client benchmarks beyond the common ones

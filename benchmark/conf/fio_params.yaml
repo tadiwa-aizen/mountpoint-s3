@@ -1,0 +1,8 @@
+# Sweeper parameters specific to FIO benchmarks
+# This file is automatically included when benchmark_type=fio
+
+hydra:
+  sweeper:
+    params:
+      # Only include direct_io parameter when running FIO benchmarks
+      'benchmarks.fio.direct_io': false, true

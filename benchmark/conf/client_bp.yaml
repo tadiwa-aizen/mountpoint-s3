@@ -1,0 +1,8 @@
+# Sweeper parameters specific to Client with Backpressure benchmarks
+# This file is automatically included when benchmark_type=client-bp
+
+hydra:
+  sweeper:
+    params:
+      # Include read window size parameters when running Client-BP benchmarks
+      'benchmarks.client_backpressure.read_window_size': 8388608, 2147483648  # 8MB, 2GB

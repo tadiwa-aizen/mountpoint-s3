@@ -1,0 +1,8 @@
+# Sweeper parameters specific to CRT benchmarks
+# This file is automatically included when benchmark_type=crt
+
+hydra:
+  sweeper:
+    params:
+      # No specific parameters for CRT benchmarks beyond the common ones
+      # The crt_benchmarks_path is typically provided via command line
