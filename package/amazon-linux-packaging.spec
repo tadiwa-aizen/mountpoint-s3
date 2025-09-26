@@ -1,6 +1,6 @@
 %bcond_without check
 
-Name:           mountpoint-s3
+Name:           mount-s3
 Version:        1.20.0
 Release:        1.amzn2023
 Summary:        High-performance file system for Amazon S3
@@ -133,12 +133,14 @@ cargo test --release --frozen --offline -- \
 %endif
 
 %files
-/opt/aws/mountpoint-s3/cargo-vendor.txt
-/opt/aws/mountpoint-s3/bin/mount-s3
+/opt/aws/mountpoint-s3
 /opt/aws/mountpoint-s3/LICENSE
 /opt/aws/mountpoint-s3/NOTICE
 /opt/aws/mountpoint-s3/THIRD_PARTY_LICENSES
 /opt/aws/mountpoint-s3/VERSION
+/opt/aws/mountpoint-s3/bin
+/opt/aws/mountpoint-s3/bin/mount-s3
+/opt/aws/mountpoint-s3/cargo-vendor.txt
 /usr/bin/mount-s3
 /usr/sbin/mount.mount-s3
 
