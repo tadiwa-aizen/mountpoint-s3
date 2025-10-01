@@ -9,22 +9,29 @@ mod built {
 
 /// Valid SemVer version constructed using declared Cargo version and short commit hash if needed.
 pub const FULL_VERSION: &str = {
-    let base_version = if is_official_aws_release() {
-        built::PKG_VERSION
+    if is_official_aws_release() {
+        if is_al2023_build() {
+            const_format::concatcp!(built::PKG_VERSION, "-al2023")
+        } else {
+            built::PKG_VERSION
+        }
     } else {
-        const_format::concatcp!(built::PKG_VERSION, "-unofficial", git_commit_suffix())
-    };
-
-    if let Some(platform) = option_env!("MOUNTPOINT_S3_TARGET_PLATFORM") {
-        const_format::concatcp!(base_version, "-", platform)
-    } else {
-        base_version
+        if is_al2023_build() {
+            const_format::concatcp!(built::PKG_VERSION, "-unofficial", git_commit_suffix(), "-al2023")
+        } else {
+            const_format::concatcp!(built::PKG_VERSION, "-unofficial", git_commit_suffix())
+        }
     }
 };
 
 /// Checks environment to see if this build is for an official Mountpoint for Amazon S3 release.
 const fn is_official_aws_release() -> bool {
     option_env!("MOUNTPOINT_S3_AWS_RELEASE").is_some()
+}
+
+/// Checks environment to see if this build is for AL2023.
+const fn is_al2023_build() -> bool {
+    option_env!("MOUNTPOINT_S3_AL2023_BUILD").is_some()
 }
 
 /// Formats the current git commit hash and dirty state as a version suffix.
