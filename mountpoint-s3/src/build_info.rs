@@ -9,10 +9,16 @@ mod built {
 
 /// Valid SemVer version constructed using declared Cargo version and short commit hash if needed.
 pub const FULL_VERSION: &str = {
-    if is_official_aws_release() {
+    let base_version = if is_official_aws_release() {
         built::PKG_VERSION
     } else {
         const_format::concatcp!(built::PKG_VERSION, "-unofficial", git_commit_suffix())
+    };
+
+    if let Some(platform) = option_env!("MOUNTPOINT_S3_TARGET_PLATFORM") {
+        const_format::concatcp!(base_version, "-", platform)
+    } else {
+        base_version
     }
 };
 
