@@ -102,7 +102,8 @@ interface.
 export CFLAGS="${{CFLAGS:-%{{optflags}}}} -O2 -Wno-error=cpp"
 export CMAKE_C_FLAGS="$CFLAGS"
 export MOUNTPOINT_S3_AWS_RELEASE="true"
-export MOUNTPOINT_S3_TARGET_PLATFORM=al2023 
+export MOUNTPOINT_S3_AL2023_BUILD="true"
+
 
 cargo build --release
 %cargo_vendor_manifest
