@@ -366,7 +366,7 @@ if __name__ == "__main__":
         "--pkg-extensions",
         type=str,
         nargs='+',
-        help="list of package extensions to be built",
+        help="list of package stuff extensions to be built",
         default=["rpm", "suse.rpm", "deb", "tar.gz"],
     )
 
@@ -374,4 +374,3 @@ if __name__ == "__main__":
 
     p = build(args)
     print(p)
-
