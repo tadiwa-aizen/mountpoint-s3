@@ -49,6 +49,8 @@ jobs:
                       ca-certificates \
                       python3 \
                       wget
+                      rust \
+                      cargo
                       
         cargo install cargo-about
 
