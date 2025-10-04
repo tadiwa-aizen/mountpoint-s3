@@ -1,0 +1,114 @@
+name: Amazon Linux 2023 RPM Build and Test
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  merge_group:
+    types: [ "checks_requested" ]
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  al2023-package-test:
+    name: Amazon Linux 2023 RPM Build and Test
+    runs-on: ubuntu-latest
+    container:
+      image: amazonlinux:2023
+      options: --privileged  # Required for FUSE mounting
+
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v5
+      with:
+        role-to-assume: ${{ vars.ACTIONS_IAM_ROLE }}
+        aws-region: ${{ vars.S3_REGION }}
+
+    - name: Checkout code
+      uses: actions/checkout@v5
+      with:
+        submodules: true
+        persist-credentials: false
+
+    - name: Install build tools and dependencies
+      run: |
+        dnf -y update
+        dnf -y install rpm-build rpmdevtools make git \
+                      @development-tools \
+                      mock \
+                      ca-certificates \
+                      fuse \
+                      fuse-libs \
+                      rust \
+                      cargo \
+                      python3 \
+                      wget
+                      
+        cargo install cargo-about
+
+    - name: Generate Amazon Linux 2023 spec file
+      run: |
+        cd $GITHUB_WORKSPACE
+        cd package
+        python3 generate_spec.py amzn2023
+        ls -la amzn2023-packaging.spec
+
+    - name: Build source tarball and SRPM
+      run: |
+        cd $GITHUB_WORKSPACE
+        
+        echo " Extracting version from spec file..."
+        VERSION=$(rpmspec --query --qf '%{VERSION}' package/amzn2023-packaging.spec)
+        echo " Building version: $VERSION"
+        
+        echo " Generating vendor dependencies..."
+        cargo vendor
+        echo " Cargo vendor completed"
+        
+        echo " Generating license file..."
+        cargo about generate --config package/attribution.toml --output-file THIRD_PARTY_LICENSES package/attribution.hbs
+        echo "Third party License file generated"
+
+        echo " Setting up RPM build directory..."
+        rpmdev-setuptree
+        echo " RPM directories created"
+
+        echo " Creating source tarball..."
+        cd ..
+        tar -czf mountpoint-s3-${VERSION}.tar.gz mountpoint-s3
+        cp mountpoint-s3-${VERSION}.tar.gz ~/rpmbuild/SOURCES/
+        echo " Source tarball created"
+
+        cp package/amzn2023-packaging.spec ~/rpmbuild/SPECS/
+
+        echo " Building Source RPM..."
+        rpmbuild -bs ~/rpmbuild/SPECS/amzn2023-packaging.spec
+        echo " SRPM build completed"
+        
+        echo " Verifying SRPM was created..."
+        ls -la ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
+        
+        # Export VERSION for next step
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+    
+    - name: Build binary RPM with Mock
+      run: |
+        echo " Building binary RPM for version: $VERSION"
+
+        mock -r amazonlinux-2023-x86_64 --clean
+
+        mock -r amazonlinux-2023-x86_64 --resultdir /tmp/mock-results --clean ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
+        
+        echo " Mock build completed"
+        echo " Build results:"
+        ls -la /tmp/mock-results/
+
+        
