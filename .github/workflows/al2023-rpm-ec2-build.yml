@@ -37,14 +37,19 @@ jobs:
         echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
         aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
         
-        # Wait for SSM
-        for i in {1..30}; do
-          aws ssm describe-instance-information --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
-            --query 'InstanceInformationList[0].InstanceId' --output text 2>/dev/null && break
-          sleep 15
+        # Wait for SSM registration - keep trying until it works
+        
+        echo "Waiting for SSM agent to register..."
+        while true; do
+          RESULT=$(aws ssm describe-instance-information --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+            --query 'InstanceInformationList[0].InstanceId' --output text 2>/dev/null)
+          if [[ "$RESULT" == "$INSTANCE_ID" ]]; then
+            echo "SSM agent registered successfully!"
+            break
+          fi
+          echo "SSM not ready yet, waiting 30 seconds..."
+          sleep 30
         done
-
-        echo "Instance is ready and SSM is running"
 
     - name: Build RPM on EC2 via SSM
       id: build_rpm
@@ -112,7 +117,7 @@ jobs:
 #      run: |
 #        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
 #        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
-
+#
     - name: Fail if build failed
       if: steps.build_rpm.outcome == 'failure'
       run: exit 1
