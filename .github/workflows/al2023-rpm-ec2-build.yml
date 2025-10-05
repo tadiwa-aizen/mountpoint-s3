@@ -73,7 +73,6 @@ jobs:
             "sudo mock -r amazonlinux-2023-x86_64 --resultdir ~/mock_results --clean ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm",
             "sudo mock -r amazonlinux-2023-x86_64 --resultdir ~/mock_results --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm",
             "sudo chown -R ssm-user:ssm-user ~/mock_results",
-            "aws s3 cp ~/mock_results s3://${{ vars.S3_BUCKET_NAME }}/rpm-builds/pr-${{ github.event.pull_request.number }}/ --recursive"
           ]' \
           --query 'Command.CommandId' --output text)
         
@@ -84,19 +83,6 @@ jobs:
           [[ "$STATUS" =~ ^(Failed|Cancelled|TimedOut)$ ]] && exit 1
           sleep 10
         done
-
-    - name: Download artifacts from S3
-      if: always()
-      run: |
-        mkdir -p ./artifacts
-        aws s3 sync s3://${{ vars.S3_BUCKET_NAME }}/rpm-builds/pr-${{ github.event.pull_request.number }}/ ./artifacts/ || true
-
-    - name: Upload artifacts to GitHub
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: mountpoint-s3-rpm-${{ github.event.pull_request.number }}
-        path: artifacts/
 
     - name: Terminate EC2 instance
       if: always()

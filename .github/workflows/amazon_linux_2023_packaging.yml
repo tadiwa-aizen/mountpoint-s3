@@ -113,12 +113,11 @@ jobs:
       run: |
         echo " Building binary RPM for version: $VERSION"
 
-        mock -r amazonlinux-2023-x86_64 --clean
+        sudo mock -r amazonlinux-2023-x86_64 --clean
 
-        mock -r amazonlinux-2023-x86_64 --resultdir /tmp/mock-results --clean ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
+        sudo mock -r amazonlinux-2023-x86_64 --clean ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
         
         echo " Mock build completed"
-        echo " Build results:"
-        ls -la /tmp/mock-results/
+
 
         
