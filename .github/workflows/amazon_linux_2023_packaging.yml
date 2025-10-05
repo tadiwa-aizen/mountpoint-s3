@@ -83,6 +83,11 @@ jobs:
 
         cp package/amzn2023-packaging.spec ~/rpmbuild/SPECS/
 
+        cp LICENSE ~/rpmbuild/SOURCES/
+        cp NOTICE ~/rpmbuild/SOURCES/
+        cp THIRD_PARTY_LICENSES ~/rpmbuild/SOURCES/
+        echo "RPM Sources created"
+
         echo " Creating source tarball..."
         cd ..
         tar -czf mountpoint-s3-${VERSION}.tar.gz mountpoint-s3
