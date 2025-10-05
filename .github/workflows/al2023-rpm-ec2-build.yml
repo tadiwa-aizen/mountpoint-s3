@@ -29,7 +29,7 @@ jobs:
       run: |
         INSTANCE_ID=$(aws ec2 run-instances \
           --image-id "resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64" \
-          --instance-type t3.small \
+          --instance-type m5dn.12xlarge \
           --iam-instance-profile Name=${{ vars.EC2_INSTANCE_PROFILE_NAME }} \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MountpointS3-RPM-Build}]' \
           --query 'Instances[0].InstanceId' --output text)
@@ -44,6 +44,8 @@ jobs:
           sleep 10
         done
 
+        echo "Instance Running"
+
     - name: Build RPM on EC2 via SSM
       id: build_rpm
       continue-on-error: true
@@ -53,10 +55,12 @@ jobs:
           --instance-ids "$INSTANCE_ID" \
           --document-name "AWS-RunShellScript" \
           --parameters 'commands=[
+            "echo 'Starting dnf update...' | tee -a /tmp/build.log",
             "dnf -y update",
+            "echo 'Installing packages...' | tee -a /tmp/build.log", 
             "dnf -y install rpm-build rpmdevtools make git mock ca-certificates python3 wget rust cargo",
+            "echo 'Installing cargo about ...' | tee -a /tmp/build.log", 
             "cargo install cargo-about",
-            "usermod -a -G mock ssm-user",
             "cd /home/ssm-user",
             "git clone https://github.com/${{ github.repository }}.git repo",
             "cd repo && git checkout ${{ github.sha }}",
@@ -82,7 +86,7 @@ jobs:
           STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" --query 'Status' --output text 2>/dev/null || echo "Pending")
           [[ "$STATUS" == "Success" ]] && break
           [[ "$STATUS" =~ ^(Failed|Cancelled|TimedOut)$ ]] && exit 1
-          sleep 12
+          sleep 10
         done
 
     - name: Terminate EC2 instance
