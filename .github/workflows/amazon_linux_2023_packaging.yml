@@ -86,10 +86,13 @@ jobs:
         echo " Creating source tarball..."
         cd ..
         tar -czf mountpoint-s3-${VERSION}.tar.gz mountpoint-s3
+        ls -la
         cp mountpoint-s3-${VERSION}.tar.gz ~/rpmbuild/SOURCES/
         echo " Source tarball created"
 
-
+        echo " Checking SOURCES directory contents..."
+        ls -la ~/rpmbuild/SOURCES/
+        echo " Contents of SOURCES directory listed"
 
         echo " Building Source RPM..."
         rpmbuild -bs ~/rpmbuild/SPECS/amzn2023-packaging.spec
