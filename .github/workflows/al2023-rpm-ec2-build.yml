@@ -71,38 +71,38 @@ jobs:
           --instance-ids "$INSTANCE_ID" \
           --document-name "AWS-RunShellScript" \
           --parameters "commands=[
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
             \"echo Starting dnf update... | tee -a /tmp/build.log\",
             \"dnf -y update 2>&1 | tee -a /tmp/build.log\",
             \"echo Installing packages... | tee -a /tmp/build.log\",
             \"dnf -y install rpm-build rpmdevtools make git mock ca-certificates python3 wget rust cargo 2>&1 | tee -a /tmp/build.log\",
             \"echo Installing cargo about... | tee -a /tmp/build.log\",
             \"cargo install cargo-about 2>&1 | tee -a /tmp/build.log\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
             \"cd /home/ssm-user\",
             \"echo Cloning repository from: $REPO_URL | tee -a /tmp/build.log\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
             \"git clone $REPO_URL repo 2>&1 | tee -a /tmp/build.log\",
             \"echo Checking out commit: $COMMIT_SHA | tee -a /tmp/build.log\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
 
             \"cd repo && git checkout $COMMIT_SHA 2>&1 | tee -a /tmp/build.log\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
 
             \"echo Generating spec file... | tee -a /tmp/build.log\",
 
             \"cd repo/package && python3 generate_spec.py amzn2023 2>&1 | tee -a /tmp/build.log\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
             \"echo Reading version... | tee -a /tmp/build.log\",
             \"cd /home/ssm-user/repo\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
             \"VERSION=\$(awk '/^Version:/ {print \$2}' package/amzn2023-packaging.spec)\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
             \"echo Building for version: \$VERSION | tee -a /tmp/build.log\",
             \"echo Starting cargo vendor... | tee -a /tmp/build.log\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
             \"cargo vendor 2>&1 | tee -a /tmp/build.log\",
-            \"ls -la | tee -a /tmp/build.log\"
+            \"ls -la | tee -a /tmp/build.log\",
             \"echo Generating licenses... | tee -a /tmp/build.log\",
             \"cargo about generate --config package/attribution.toml --output-file THIRD_PARTY_LICENSES package/attribution.hbs 2>&1 | tee -a /tmp/build.log\",
             \"echo Setting up RPM build tree... | tee -a /tmp/build.log\",
@@ -133,13 +133,13 @@ jobs:
         done
 
     
-
-#    - name: Terminate EC2 instance
-#      if: always()
-#      run: |
-#        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
-#        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
-
+#
+ #   - name: Terminate EC2 instance
+ #     if: always()
+ #     run: |
+ #       aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+ #       aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
+#
     - name: Fail if build failed
       if: steps.build_rpm.outcome == 'failure'
       run: exit 1
