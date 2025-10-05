@@ -30,6 +30,7 @@ jobs:
         INSTANCE_ID=$(aws ec2 run-instances \
           --image-id "resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64" \
           --instance-type t3.small \
+          --iam-instance-profile Name=${{ vars.EC2_INSTANCE_PROFILE_NAME }} \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MountpointS3-RPM-Build}]' \
           --query 'Instances[0].InstanceId' --output text)
         
@@ -81,7 +82,7 @@ jobs:
           STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" --query 'Status' --output text 2>/dev/null || echo "Pending")
           [[ "$STATUS" == "Success" ]] && break
           [[ "$STATUS" =~ ^(Failed|Cancelled|TimedOut)$ ]] && exit 1
-          sleep 10
+          sleep 12
         done
 
     - name: Terminate EC2 instance
