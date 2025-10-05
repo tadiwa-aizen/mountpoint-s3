@@ -81,13 +81,15 @@ jobs:
         rpmdev-setuptree
         echo " RPM directories created"
 
+        cp package/amzn2023-packaging.spec ~/rpmbuild/SPECS/
+
         echo " Creating source tarball..."
         cd ..
         tar -czf mountpoint-s3-${VERSION}.tar.gz mountpoint-s3
         cp mountpoint-s3-${VERSION}.tar.gz ~/rpmbuild/SOURCES/
         echo " Source tarball created"
 
-        cp package/amzn2023-packaging.spec ~/rpmbuild/SPECS/
+
 
         echo " Building Source RPM..."
         rpmbuild -bs ~/rpmbuild/SPECS/amzn2023-packaging.spec
