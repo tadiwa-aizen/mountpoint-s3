@@ -29,7 +29,7 @@ jobs:
       run: |
         INSTANCE_ID=$(aws ec2 run-instances \
           --image-id "resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64" \
-          --instance-type t3.small \
+          --instance-type m5dn.12xlarge \
           --iam-instance-profile Name=${{ vars.EC2_INSTANCE_PROFILE_NAME }} \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MountpointS3-RPM-Build}]' \
           --query 'Instances[0].InstanceId' --output text)
@@ -43,6 +43,8 @@ jobs:
             --query 'InstanceInformationList[0].InstanceId' --output text 2>/dev/null && break
           sleep 10
         done
+
+        echo "Instance is ready and SSM is running"
 
     - name: Build RPM on EC2 via SSM
       id: build_rpm
@@ -85,11 +87,11 @@ jobs:
           sleep 12
         done
 
-#    - name: Terminate EC2 instance
-#      if: always()
-#      run: |
-#        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
-#        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
+    - name: Terminate EC2 instance
+      if: always()
+      run: |
+        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
 
     - name: Fail if build failed
       if: steps.build_rpm.outcome == 'failure'
