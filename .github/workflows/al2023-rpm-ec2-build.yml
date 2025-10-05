@@ -29,7 +29,7 @@ jobs:
       run: |
         INSTANCE_ID=$(aws ec2 run-instances \
           --image-id "resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64" \
-          --instance-type m5dn.12xlarge \
+          --instance-type t3.small \
           --iam-instance-profile Name=${{ vars.EC2_INSTANCE_PROFILE_NAME }} \
           --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MountpointS3-RPM-Build}]' \
           --query 'Instances[0].InstanceId' --output text)
@@ -44,8 +44,6 @@ jobs:
           sleep 10
         done
 
-        echo "Instance Running"
-
     - name: Build RPM on EC2 via SSM
       id: build_rpm
       continue-on-error: true
@@ -54,7 +52,29 @@ jobs:
         CMD_ID=$(aws ssm send-command \
           --instance-ids "$INSTANCE_ID" \
           --document-name "AWS-RunShellScript" \
-          --parameters 'commands=["echo Starting dnf update... | tee -a /tmp/build.log","dnf -y update 2>&1 | tee -a /tmp/build.log","echo Installing packages... | tee -a /tmp/build.log","dnf -y install rpm-build rpmdevtools make git mock ca-certificates python3 wget rust cargo 2>&1 | tee -a /tmp/build.log","echo Installing cargo about... | tee -a /tmp/build.log","cargo install cargo-about 2>&1 | tee -a /tmp/build.log","usermod -a -G mock ssm-user","cd /home/ssm-user","git clone https://github.com/${{ github.repository }}.git repo","cd repo && git checkout ${{ github.sha }}","cd package && python3 generate_spec.py amzn2023","cd /home/ssm-user/repo","VERSION=$(awk \"/^Version:/ {print \\$2}\" package/amzn2023-packaging.spec)","echo Starting cargo vendor... | tee -a /tmp/build.log","cargo vendor 2>&1 | tee -a /tmp/build.log","echo Generating licenses... | tee -a /tmp/build.log","cargo about generate --config package/attribution.toml --output-file THIRD_PARTY_LICENSES package/attribution.hbs 2>&1 | tee -a /tmp/build.log","rpmdev-setuptree","cp package/amzn2023-packaging.spec ~/rpmbuild/SPECS/","cp LICENSE NOTICE THIRD_PARTY_LICENSES ~/rpmbuild/SOURCES/","cd .. && tar -czf mountpoint-s3-${VERSION}.tar.gz mountpoint-s3","cp mountpoint-s3-${VERSION}.tar.gz /home/ssm-user/rpmbuild/SOURCES/","cd /home/ssm-user && rpmbuild -bs ~/rpmbuild/SPECS/amzn2023-packaging.spec","echo Starting mock build... | tee -a /tmp/build.log","sudo mock -r amazonlinux-2023-x86_64 --resultdir ~/mock_results --clean ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm 2>&1 | tee -a /tmp/build.log","sudo mock -r amazonlinux-2023-x86_64 --resultdir ~/mock_results --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm 2>&1 | tee -a /tmp/build.log","sudo chown -R ssm-user:ssm-user ~/mock_results","echo Build complete! | tee -a /tmp/build.log"]' \
+          --parameters 'commands=[
+            "dnf -y update",
+            "dnf -y install rpm-build rpmdevtools make git mock ca-certificates python3 wget rust cargo",
+            "cargo install cargo-about",
+            "usermod -a -G mock ssm-user",
+            "cd /home/ssm-user",
+            "git clone https://github.com/${{ github.repository }}.git repo",
+            "cd repo && git checkout ${{ github.sha }}",
+            "cd package && python3 generate_spec.py amzn2023",
+            "cd /home/ssm-user/repo",
+            "VERSION=$(awk \"/^Version:/ {print \\$2}\" package/amzn2023-packaging.spec)",
+            "cargo vendor",
+            "cargo about generate --config package/attribution.toml --output-file THIRD_PARTY_LICENSES package/attribution.hbs",
+            "rpmdev-setuptree",
+            "cp package/amzn2023-packaging.spec ~/rpmbuild/SPECS/",
+            "cp LICENSE NOTICE THIRD_PARTY_LICENSES ~/rpmbuild/SOURCES/",
+            "cd .. && tar -czf mountpoint-s3-${VERSION}.tar.gz mountpoint-s3",
+            "cp mountpoint-s3-${VERSION}.tar.gz /home/ssm-user/rpmbuild/SOURCES/",
+            "cd /home/ssm-user && rpmbuild -bs ~/rpmbuild/SPECS/amzn2023-packaging.spec",
+            "sudo mock -r amazonlinux-2023-x86_64 --resultdir ~/mock_results --clean ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm",
+            "sudo mock -r amazonlinux-2023-x86_64 --resultdir ~/mock_results --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm",
+            "sudo chown -R ssm-user:ssm-user ~/mock_results",
+          ]' \
           --query 'Command.CommandId' --output text)
         
         # Wait for completion
@@ -62,14 +82,14 @@ jobs:
           STATUS=$(aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "$INSTANCE_ID" --query 'Status' --output text 2>/dev/null || echo "Pending")
           [[ "$STATUS" == "Success" ]] && break
           [[ "$STATUS" =~ ^(Failed|Cancelled|TimedOut)$ ]] && exit 1
-          sleep 10
+          sleep 12
         done
 
-    - name: Terminate EC2 instance
-      if: always()
-      run: |
-        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
-        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
+#    - name: Terminate EC2 instance
+#      if: always()
+#      run: |
+#        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+#        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
 
     - name: Fail if build failed
       if: steps.build_rpm.outcome == 'failure'
