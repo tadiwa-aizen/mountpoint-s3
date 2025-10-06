@@ -54,9 +54,13 @@ jobs:
     - name: Extract repository info
       id: repo_info
       run: |
-        echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
-        echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
-        echo "ref_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          echo "repository=${{ github.event.pull_request.head.repo.full_name }}" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+        else
+          echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        fi
 
     - name: Build RPM on EC2 via SSM
       id: build_rpm
@@ -64,7 +68,7 @@ jobs:
       run: |
         # Extract values to shell variables
         REPO_URL="https://github.com/${{ steps.repo_info.outputs.repository }}.git"
-        COMMIT_SHA="${{ steps.repo_info.outputs.sha }}"
+        BRANCH_NAME="${{ steps.repo_info.outputs.branch }}"
         
         # Copy the existing build logic from amazon_linux_2023_packaging.yml
         CMD_ID=$(aws ssm send-command \
@@ -83,10 +87,10 @@ jobs:
             \"echo Cloning repository from: $REPO_URL | tee -a /tmp/build.log\",
             \"ls -la | tee -a /tmp/build.log\",
             \"git clone $REPO_URL repo 2>&1 | tee -a /tmp/build.log\",
-            \"echo Checking out commit: $COMMIT_SHA | tee -a /tmp/build.log\",
+            \"echo Checking out branch: $BRANCH_NAME | tee -a /tmp/build.log\",
             \"ls -la | tee -a /tmp/build.log\",
 
-            \"cd repo && git checkout $COMMIT_SHA 2>&1 | tee -a /tmp/build.log\",
+            \"cd repo && git checkout $BRANCH_NAME 2>&1 | tee -a /tmp/build.log\",
             \"ls -la | tee -a /tmp/build.log\",
 
             \"echo Generating spec file... | tee -a /tmp/build.log\",
@@ -133,13 +137,13 @@ jobs:
         done
 
     
-#
- #   - name: Terminate EC2 instance
- #     if: always()
- #     run: |
- #       aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
- #       aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
-#
+
+#    - name: Terminate EC2 instance
+#      if: always()
+#      run: |
+#        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+#        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
+
     - name: Fail if build failed
       if: steps.build_rpm.outcome == 'failure'
       run: exit 1
