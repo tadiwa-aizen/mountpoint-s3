@@ -12,6 +12,8 @@ env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
+  S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
+  S3_REGION: ${{ vars.S3_REGION }}
 
 permissions:
   id-token: write
@@ -23,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: amazonlinux:2023
-      options: --privileged  # Required for FUSE mounting
+      options: --privileged
 
     steps:
     - name: Install Git
@@ -128,7 +130,7 @@ jobs:
 
         echo " Mock build completed"
 
-    - name: Test RPM installation and functionality
+    - name: Test RPM installation
       run: |
         echo "Testing RPM installation..."
 
@@ -155,4 +157,23 @@ jobs:
 
         echo "RPM installation test completed successfully"
 
-        
+    - name: Test installed version with file operations
+      run: |
+        mkdir -p /mnt/s3-test
+        TEST_PREFIX="rpm-test-$(date +%s)/"
+
+        # First, upload a test file to S3
+        echo "Hello from RPM test" | aws s3 cp - "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
+
+        # Mount and verify we can read it
+        mount-s3 ${S3_BUCKET_NAME} /mnt/s3-test --prefix=${TEST_PREFIX} --region=${S3_REGION}
+
+        # Test ls shows our file
+        ls -la /mnt/s3-test/
+
+        # Test reading the file
+        cat /mnt/s3-test/test.txt
+
+        # Cleanup
+        sudo umount /mnt/s3-test
+        aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
