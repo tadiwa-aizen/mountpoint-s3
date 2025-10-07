@@ -136,13 +136,11 @@ jobs:
           sleep 12
         done
 
-    
-
-#    - name: Terminate EC2 instance
-#      if: always()
-#      run: |
-#        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
-#        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
+    - name: Terminate EC2 instance
+      if: always()
+      run: |
+        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+        aws ec2 wait instance-terminated --instance-ids "$INSTANCE_ID" || true
 
     - name: Fail if build failed
       if: steps.build_rpm.outcome == 'failure'

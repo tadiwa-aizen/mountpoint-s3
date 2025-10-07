@@ -108,12 +108,13 @@ jobs:
         # Export VERSION for next step
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-    - name: Fix PAM by installing sudo interactively
+    - name: Avoid PAM issues by installing sudo interactively
       run: |
+        # https://github.com/geerlingguy/docker-rockylinux9-ansible/issues/6
         echo "y" | dnf install sudo
         chmod 0400 /etc/shadow || true
     
-    - name: Build binary RPM with Mock
+    - name: Test RPM build with Mock in Amazon Linux 2023 chroot
       run: |
         echo " Building binary RPM for version: $VERSION"
 
@@ -124,8 +125,34 @@ jobs:
         echo "Files created"
 
         ls -la /var/lib/mock/amazonlinux-2023-x86_64/result/
-        
+
         echo " Mock build completed"
 
+    - name: Test RPM installation and functionality
+      run: |
+        echo "Testing RPM installation..."
+
+        # Install the main binary RPM
+        echo "Installing mount-s3 RPM..."
+        dnf -y install /var/lib/mock/amazonlinux-2023-x86_64/result/mount-s3-${VERSION}-amzn2023.x86_64.rpm
+
+        # Verify installation
+        echo "Verifying installation..."
+        which mount-s3
+
+        # Test basic functionality
+        echo "Testing basic functionality..."
+        mount-s3 --version
+        mount-s3 --help | head -10
+
+        # Show what files were installed
+        echo "Files installed by RPM:"
+        rpm -ql mount-s3
+
+        # Show package info
+        echo "Package information:"
+        rpm -qi mount-s3
+
+        echo "RPM installation test completed successfully"
 
         
