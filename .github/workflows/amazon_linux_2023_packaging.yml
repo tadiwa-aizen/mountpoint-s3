@@ -157,24 +157,18 @@ jobs:
 
         echo "RPM installation test completed successfully"
 
-    - name: Test installed version with file operations
+    - name: Test mount with file operations
       run: |
-        dnf -y install awscli
         mkdir -p /mnt/s3-test
-        TEST_PREFIX="rpm-test-$(date +%s)/"
 
-        # First, upload a test file to S3
+        # Use allowed prefix: github-actions-tmp/
+        TEST_PREFIX="github-actions-tmp/run-${{ github.run_id }}/rpm-test/"
+
         echo "Hello from RPM test" | aws s3 cp - "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
-
-        # Mount and verify we can read it
         mount-s3 ${S3_BUCKET_NAME} /mnt/s3-test --prefix=${TEST_PREFIX} --region=${S3_REGION}
-
-        # Test ls shows our file
+        
         ls -la /mnt/s3-test/
-
-        # Test reading the file
         cat /mnt/s3-test/test.txt
 
-        # Cleanup
         sudo umount /mnt/s3-test
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
