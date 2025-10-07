@@ -43,7 +43,6 @@ jobs:
 
     - name: Install build tools and dependencies
       run: |
-        dnf -y update
         dnf -y install rpm-build rpmdevtools make git \
                       mock \
                       ca-certificates \
@@ -112,6 +111,7 @@ jobs:
     - name: Fix PAM by installing sudo interactively
       run: |
         echo "y" | dnf install sudo
+        chmod 0400 /etc/shadow || true
     
     - name: Build binary RPM with Mock
       run: |
