@@ -159,6 +159,8 @@ jobs:
 
     - name: Test mount with file operations
       run: |
+        dnf -y install awscli
+
         mkdir -p /mnt/s3-test
 
         # Use allowed prefix: github-actions-tmp/
@@ -166,7 +168,7 @@ jobs:
 
         echo "Hello from RPM test" | aws s3 cp - "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
         mount-s3 ${S3_BUCKET_NAME} /mnt/s3-test --prefix=${TEST_PREFIX} --region=${S3_REGION}
-        
+
         ls -la /mnt/s3-test/
         cat /mnt/s3-test/test.txt
 
