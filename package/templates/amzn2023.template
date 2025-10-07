@@ -1,0 +1,33 @@
+BuildRequires:  clang
+BuildRequires:  clang-devel
+BuildRequires:  rust >= 1.68.2
+BuildRequires:  cargo >= 1.68.2
+BuildRequires:  cmake
+BuildRequires:  gcc
+BuildRequires:  gcc-c++
+BuildRequires:  git
+BuildRequires:  pkgconfig
+BuildRequires:  fuse-devel
+BuildRequires:  glibc-devel
+BuildRequires:  glibc-headers
+BuildRequires:  glibc-static
+BuildRequires:  libstdc++-devel
+BuildRequires:  nasm
+BuildRequires:  make
+BuildRequires:  which
+BuildRequires:  rust-packaging
+BuildRequires:  rust-toolset
+
+ExclusiveArch: x86_64 aarch64
+
+Requires:       ca-certificates
+Requires:       fuse >= 2.9.0
+Requires:       fuse-libs >= 2.9.0
+
+---BUILD_SECTION---
+%build
+export CFLAGS="${CFLAGS:-%{optflags}} -O2 -Wno-error=cpp"
+export CMAKE_C_FLAGS="$CFLAGS"
+export MOUNTPOINT_S3_AWS_RELEASE="amzn2023"
+cargo build --release
+%cargo_vendor_manifest
