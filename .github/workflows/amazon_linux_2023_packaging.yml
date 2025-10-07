@@ -119,7 +119,11 @@ jobs:
 
         sudo mock -r amazonlinux-2023-x86_64 --clean
 
-        sudo mock -r amazonlinux-2023-x86_64 --clean ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
+        sudo mock -r amazonlinux-2023-x86_64 --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
+        
+        echo "Files created"
+
+        ls -la /var/lib/mock/amazonlinux-2023-x86_64/result/
         
         echo " Mock build completed"
 
