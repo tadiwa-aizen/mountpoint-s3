@@ -159,6 +159,7 @@ jobs:
 
     - name: Test installed version with file operations
       run: |
+        dnf -y install awscli
         mkdir -p /mnt/s3-test
         TEST_PREFIX="rpm-test-$(date +%s)/"
 
