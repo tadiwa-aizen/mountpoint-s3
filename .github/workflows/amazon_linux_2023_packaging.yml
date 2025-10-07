@@ -51,7 +51,6 @@ jobs:
                       wget \
                       rust \
                       cargo \
-                      sudo
                       
         cargo install cargo-about
 
@@ -109,6 +108,10 @@ jobs:
         
         # Export VERSION for next step
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+    - name: Fix PAM by installing sudo interactively
+      run: |
+        echo "y" | dnf install sudo
     
     - name: Build binary RPM with Mock
       run: |
