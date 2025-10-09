@@ -5,8 +5,10 @@ on:
     branches: [ "main" ]
   push:
     branches: [ "main" ]
-  merge_group:
-    types: [ "checks_requested" ]
+
+permissions:
+  id-token: write
+  contents: read
 
 env:
   RUST_BACKTRACE: 1
@@ -14,10 +16,6 @@ env:
   CARGO_INCREMENTAL: 0
   S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
   S3_REGION: ${{ vars.S3_REGION }}
-
-permissions:
-  id-token: write
-  contents: read
 
 jobs:
   al2023-package-test:
@@ -52,24 +50,17 @@ jobs:
     - name: Build source tarball and SRPM
       run: |
         VERSION=$(awk '/^Version:/ {print $2}' amzn2023.spec)
-        
         cargo vendor
-        
         cargo about generate --config package/attribution.toml --output-file THIRD_PARTY_LICENSES package/attribution.hbs
-
         rpmdev-setuptree
 
         cp amzn2023.spec ~/rpmbuild/SPECS/
         cp LICENSE NOTICE THIRD_PARTY_LICENSES ~/rpmbuild/SOURCES
 
         cd ..
-
         tar -czf "mountpoint-s3-${VERSION}.tar.gz" mountpoint-s3
-
         cp "mountpoint-s3-${VERSION}.tar.gz" ~/rpmbuild/SOURCES/
-
         rpmbuild -bs ~/rpmbuild/SPECS/amzn2023.spec
-
         echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
 
     - name: Preventing container PAM sudo errors
@@ -81,16 +72,11 @@ jobs:
       run: |
         sudo mock -r amazonlinux-2023-x86_64 --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
 
-        ls -la /var/lib/mock/amazonlinux-2023-x86_64/result/
-
     - name: Test RPM installation
       run: |
         dnf -y install /var/lib/mock/amazonlinux-2023-x86_64/result/mount-s3-${VERSION}-amzn2023.x86_64.rpm
-
         which mount-s3
-
         mount-s3 --version
-  
         mount-s3 --help 
     
     - name: Basic Functionality Tests
@@ -100,27 +86,20 @@ jobs:
         TEST_PREFIX="github-actions-tmp/run-${{ github.run_id }}/rpm-test/"
 
         # Read Test
-
         echo "Hello from RPM test" | aws s3 cp - "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
-
         mount-s3 "${S3_BUCKET_NAME}" /mnt/s3-test --prefix="${TEST_PREFIX}" --region="${S3_REGION}"
-
         cat /mnt/s3-test/test.txt | grep -q "Hello from RPM test"
 
         # Write Test
-
         echo "Hello from RPM write test" > /mnt/s3-test/write-test.txt
-        
-        # Verify the file exists in S3 with correct content
         aws s3 cp "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}write-test.txt" - | grep -q "Hello from RPM write test"
-        
+  
         sudo umount /mnt/s3-test
-
-        aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}write-test.txt"
 
     - name: Cleanup test resources
       if: always()
       run: |
+        TEST_PREFIX="github-actions-tmp/run-${{ github.run_id }}/rpm-test/"
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt" || true
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}write-test.txt" || true
 
