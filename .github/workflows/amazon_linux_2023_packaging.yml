@@ -29,7 +29,7 @@ jobs:
 
     steps:
     - name: Install build tools and dependencies
-      run: 
+      run: |
         dnf -y install git rpm-build rpmdevtools make mock ca-certificates python3 rust cargo
         cargo install cargo-about
 
