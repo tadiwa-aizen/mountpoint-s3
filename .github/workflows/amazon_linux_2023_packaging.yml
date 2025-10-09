@@ -30,7 +30,7 @@ jobs:
     steps:
     - name: Install build tools and dependencies
       run: |
-        dnf -y install git rpm-build rpmdevtools make mock ca-certificates python3 rust cargo sudo
+        dnf -y install git rpm-build rpmdevtools make mock ca-certificates python3 rust cargo sudo awscli
         cargo install cargo-about
 
     - name: Configure AWS credentials
