@@ -154,7 +154,7 @@ ln -sf /opt/aws/mountpoint-s3/bin/mount-s3 %{{buildroot}}/%{{_prefix}}/sbin/moun
 """
 
     # Write output
-    output_file = f"{build_target}-packaging.spec"
+    output_file = f"{build_target}.spec"
     with open(output_file, "w") as f:
         f.write(spec_content)
 
