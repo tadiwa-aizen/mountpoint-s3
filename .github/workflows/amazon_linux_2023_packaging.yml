@@ -51,7 +51,7 @@ jobs:
 
     - name: Build source tarball and SRPM
       run: |
-        VERSION=$(awk '/^Version:/ {print $2}' package/amzn2023.spec)
+        VERSION=$(awk '/^Version:/ {print $2}' amzn2023.spec)
         
         cargo vendor
         
@@ -59,7 +59,7 @@ jobs:
 
         rpmdev-setuptree
 
-        cp package/amzn2023-packaging.spec ~/rpmbuild/SPECS/
+        cp amzn2023.spec ~/rpmbuild/SPECS/
         cp LICENSE NOTICE THIRD_PARTY_LICENSES ~/rpmbuild/SOURCES
 
         cd ..
@@ -68,7 +68,7 @@ jobs:
 
         cp "mountpoint-s3-${VERSION}.tar.gz" ~/rpmbuild/SOURCES/
 
-        rpmbuild -bs ~/rpmbuild/SPECS/amzn2023-packaging.spec
+        rpmbuild -bs ~/rpmbuild/SPECS/amzn2023.spec
 
         echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
 
