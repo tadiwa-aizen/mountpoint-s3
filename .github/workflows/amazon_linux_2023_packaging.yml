@@ -47,14 +47,11 @@ jobs:
 
     - name: Generate Amazon Linux 2023 spec file
       run: |
-        pwd
-        ls -la
-        cd "$GITHUB_WORKSPACE"
         python3 package/generate_spec.py amzn2023
 
     - name: Build source tarball and SRPM
       run: |
-        VERSION=$(awk '/^Version:/ {print $2}' package/amzn2023-packaging.spec)
+        VERSION=$(awk '/^Version:/ {print $2}' package/amzn2023.spec)
         
         cargo vendor
         
