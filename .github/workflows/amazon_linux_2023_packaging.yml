@@ -1,4 +1,4 @@
-name: Amazon Linux 2023 RPM Build and Test
+name: AL2023 RPM Build Tests
 
 on:
   pull_request:
@@ -84,6 +84,7 @@ jobs:
         mkdir -p /mnt/s3-test
 
         TEST_PREFIX="github-actions-tmp/run-${{ github.run_id }}/rpm-test/"
+        echo "TEST_PREFIX=${TEST_PREFIX}" >> "$GITHUB_ENV"
 
         # Read Test
         echo "Hello from RPM test" | aws s3 cp - "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
@@ -99,9 +100,5 @@ jobs:
     - name: Cleanup test resources
       if: always()
       run: |
-        TEST_PREFIX="github-actions-tmp/run-${{ github.run_id }}/rpm-test/"
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt" || true
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}write-test.txt" || true
-
-        
-      
