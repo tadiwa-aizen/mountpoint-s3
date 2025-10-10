@@ -16,7 +16,7 @@ env:
   CARGO_INCREMENTAL: 0
   S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
   S3_REGION: ${{ vars.S3_REGION }}
-  TEST_PREFIX="github-actions-tmp/run-${{ github.run_id }}/rpm-test/"
+  TEST_PREFIX: "github-actions-tmp/run-${{ github.run_id }}/rpm-test/"
 
 jobs:
   al2023-package-test:
