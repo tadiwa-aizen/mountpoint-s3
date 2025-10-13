@@ -53,8 +53,8 @@ jobs:
     - name: Generate Amazon Linux 2023 spec file
       run: |
         ls -la
-        python3 package/generate_spec.py amzn2023
-        ls- la
+        python3.11 package/generate_spec.py amzn2023
+        ls -la
         echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo '```spec' >> $GITHUB_STEP_SUMMARY
