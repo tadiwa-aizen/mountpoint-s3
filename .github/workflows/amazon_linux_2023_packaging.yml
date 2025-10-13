@@ -55,11 +55,11 @@ jobs:
     - name: Generate Amazon Linux 2023 spec file
       run: |
         cd package
-        uv run python generate_spec.py amzn2023
+        uv run python generate_spec.py amzn2023 && mv amzn2023.spec ../
         echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo '```spec' >> $GITHUB_STEP_SUMMARY
-        cat amzn2023.spec >> $GITHUB_STEP_SUMMARY
+        cat ../amzn2023.spec >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Build source tarball and SRPM
