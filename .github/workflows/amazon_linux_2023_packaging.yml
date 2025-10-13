@@ -29,9 +29,11 @@ jobs:
     steps:
     - name: Install build tools and dependencies
       run: |
-        dnf -y install git rpm-build rpmdevtools make mock ca-certificates python3 python3-pip rust cargo sudo awscli
-        python3 -m pip install jinja2 tomli
+        dnf -y install git rpm-build rpmdevtools make mock ca-certificates rust cargo sudo awscli python3 python3-pip
         cargo install cargo-about
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
 
     - name: Preventing container PAM sudo errors
       run: |
@@ -52,7 +54,8 @@ jobs:
 
     - name: Generate Amazon Linux 2023 spec file
       run: |
-        python3 package/generate_spec.py amzn2023
+        cd package
+        uv run python generate_spec.py amzn2023
         echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo '```spec' >> $GITHUB_STEP_SUMMARY
@@ -77,7 +80,6 @@ jobs:
 
     - name: Test RPM build with Mock in Amazon Linux 2023 chroot
       run: |
-
         sudo mock -r amazonlinux-2023-x86_64 --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
 
     - name: Test RPM installation
