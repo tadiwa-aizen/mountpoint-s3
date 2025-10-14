@@ -54,7 +54,7 @@ jobs:
 
     - name: Generate Amazon Linux 2023 spec file
       run: |
-        uv run python generate_spec.py amzn2023 && mv amzn2023.spec ../
+        uv run python package/generate_spec.py amzn2023 && mv amzn2023.spec ../
         cat << EOF >> $GITHUB_STEP_SUMMARY
         ## Generated Amazon Linux 2023 Spec File
 
