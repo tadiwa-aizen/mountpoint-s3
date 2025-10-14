@@ -40,10 +40,9 @@ def get_submodule_versions() -> dict[str, str]:
     )
     versions = {}
     for line in result.stdout.strip().split('\n'):
-        parts = line.split(' ', 1)
-        if len(parts) == 2:
-            name, version = parts
-            versions[name] = version.removeprefix('v')
+        match line.split(' ', 1):
+            case [name, version]:
+                versions[name] = version.removeprefix('v')
     return versions
 
 
@@ -51,6 +50,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate RPM spec files for different distributions")
     parser.add_argument("build_target", help="Target distribution (e.g., amzn2023)")
     parser.add_argument("--template", help="Custom template file (default: {build_target}.spec.template)")
+    parser.add_argument("--output", "-o", help="Output file path (default: {build_target}.spec)")
 
     args = parser.parse_args()
     build_target = args.build_target
@@ -75,7 +75,7 @@ def main() -> None:
         version=version, rust_version=rust_version, current_date=current_date, submodule_versions=submodule_versions
     )
 
-    output_file = f"{build_target}.spec"
+    output_file = args.output or f"{build_target}.spec"
     with open(output_file, "w") as f:
         f.write(spec_content)
 
