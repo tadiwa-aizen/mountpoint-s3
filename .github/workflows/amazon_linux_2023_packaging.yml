@@ -34,8 +34,6 @@ jobs:
 
     - name: Install uv
       uses: astral-sh/setup-uv@v6
-      with:
-        python-version: "3.12"
 
     - name: Preventing container PAM sudo errors
       run: |
@@ -57,7 +55,8 @@ jobs:
     - name: Generate Amazon Linux 2023 spec file
       run: |
         rpmdev-setuptree
-        uv run python package/generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
+        cd package 
+        uv run python generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
         cat << EOF >> $GITHUB_STEP_SUMMARY
         ## Generated Amazon Linux 2023 Spec File
 
