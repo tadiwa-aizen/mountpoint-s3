@@ -21,7 +21,17 @@ env:
 jobs:
   al2023-package-test:
     name: Amazon Linux 2023 RPM Build and Test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+            mock_config: amazonlinux-2023-x86_64
+          - arch: aarch64  
+            runner: [self-hosted, linux, arm64]
+            mock_config: amazonlinux-2023-aarch64
+
     container:
       image: amazonlinux:2023
       options: --privileged
@@ -57,14 +67,12 @@ jobs:
         rpmdev-setuptree
         cd package 
         uv run python generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
-
-        cat << EOF >> $GITHUB_STEP_SUMMARY
-        ## Generated Amazon Linux 2023 Spec File
-
-        ```spec
-        $(cat ~/rpmbuild/SPECS/amzn2023.spec)
-        ```
-        EOF
+        echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo '```spec' >> $GITHUB_STEP_SUMMARY
+        cat ../amzn2023.spec >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Build source tarball and SRPM
       run: |
@@ -82,11 +90,11 @@ jobs:
 
     - name: Test RPM build with Mock in Amazon Linux 2023 chroot
       run: |
-        sudo mock -r amazonlinux-2023-x86_64 --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
+        sudo mock -r ${{ matrix.mock_config }} --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
 
     - name: Test RPM installation
       run: |
-        dnf -y install /var/lib/mock/amazonlinux-2023-x86_64/result/mount-s3-${VERSION}-amzn2023.x86_64.rpm
+        dnf -y install /var/lib/mock/${{ matrix.mock_config }}/result/mount-s3-${VERSION}-amzn2023.${{ matrix.arch }}.rpm
         which mount-s3
         mount-s3 --version
         mount-s3 --help
@@ -111,10 +119,3 @@ jobs:
       run: |
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}write-test.txt"
-
-        echo "=== BUILD LOG ==="
-        sudo cat /var/lib/mock/amazonlinux-2023-x86_64/result/build.log || echo "No build.log found"
-        echo "=== ROOT LOG ==="
-        sudo cat /var/lib/mock/amazonlinux-2023-x86_64/result/root.log || echo "No root.log found"
-        echo "=== STATE LOG ==="
-        sudo cat /var/lib/mock/amazonlinux-2023-x86_64/result/state.log || echo "No state.log found"
