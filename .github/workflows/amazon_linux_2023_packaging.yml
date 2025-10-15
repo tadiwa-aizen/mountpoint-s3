@@ -70,7 +70,7 @@ jobs:
         echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo '```spec' >> $GITHUB_STEP_SUMMARY
-        cat ../amzn2023.spec >> $GITHUB_STEP_SUMMARY
+        cat ~/rpmbuild/SPECS/amzn2023.spec >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo '```' >> $GITHUB_STEP_SUMMARY
 
@@ -84,7 +84,6 @@ jobs:
         cd ..
         tar -czf "mountpoint-s3-${VERSION}.tar.gz" mountpoint-s3
         cp "mountpoint-s3-${VERSION}.tar.gz" ~/rpmbuild/SOURCES/
-        ls -la ~/rpmbuild/SOURCES/
         rpmbuild -bs ~/rpmbuild/SPECS/amzn2023.spec
         echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
 
