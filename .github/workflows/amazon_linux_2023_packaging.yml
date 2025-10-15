@@ -43,7 +43,7 @@ jobs:
         cargo install cargo-about
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@v7
 
     - name: Preventing container PAM sudo errors
       run: |
