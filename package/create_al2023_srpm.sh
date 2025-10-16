@@ -5,7 +5,7 @@ set -euo pipefail
 rpmdev-setuptree
 
 # Generate spec file
-uv run --directory package python generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
+uv run --directory package/spec python generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
 
 # Extract version from spec file
 VERSION=$(awk '/^Version:/ {print $2}' ~/rpmbuild/SPECS/amzn2023.spec)
