@@ -7,15 +7,15 @@ Summary:        Mountpoint for Amazon S3
 
 License:        Apache-2.0
 URL:            https://github.com/awslabs/mountpoint-s3 
-Source0:        mountpoint-s3-%{version}.tar.gz
+Source0:        mountpoint-s3-1.21.0.tar.gz
 Source1:        LICENSE
 Source2:        NOTICE
 Source3:        THIRD_PARTY_LICENSES
 
 BuildRequires:  clang
 BuildRequires:  clang-devel
-BuildRequires:  rust >= 1.88
-BuildRequires:  cargo => 1.88
+BuildRequires:  rust >= 1.88      
+BuildRequires:  cargo >= 1.88    
 BuildRequires:  cmake
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
@@ -34,8 +34,6 @@ BuildRequires:  rust-toolset
 
 ExclusiveArch: x86_64 aarch64
 
-<<<<<<<< HEAD:amzn2023-packaging.spec
-# BUNDLED C/C++ LIBRARIES - Required virtual provides for security tracking
 Provides: bundled(aws-c-auth) = 0.9.0
 Provides: bundled(aws-c-cal) = 0.9.2
 Provides: bundled(aws-c-common) = 0.12.4
@@ -47,11 +45,6 @@ Provides: bundled(aws-c-sdkutils) = 0.2.4
 Provides: bundled(aws-checksums) = 0.2.6
 Provides: bundled(aws-lc) = 1.53.1
 Provides: bundled(s2n-tls) = 1.5.18
-========
-{% for lib_name, lib_version in submodule_versions.items() %}
-Provides: bundled({{ lib_name }}) = {{ lib_version }}
-{% endfor %}
->>>>>>>> b1b7dee (Addressign comments):package/spec/templates/amzn2023.spec.template
 
 Requires:       ca-certificates
 Requires:       fuse >= 2.9.0
@@ -66,34 +59,30 @@ translates these operations into S3 object API calls, giving your applications
 access to the elastic storage and throughput of Amazon S3 through a file
 interface.
 
-%prep
-%autosetup -n mountpoint-s3
-%cargo_prep -v vendor
-
 %build
 export CFLAGS="${CFLAGS:-%{optflags}} -O2 -Wno-error=cpp"
 export CMAKE_C_FLAGS="$CFLAGS"
 
-export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
+export MOUNTPOINT_S3_AWS_RELEASE="amzn2023"
 
-<<<<<<<< HEAD:amzn2023-packaging.spec
 cargo build --release
-========
-cargo build --release --bin mount-s3
 
->>>>>>>> b1b7dee (Addressign comments):package/spec/templates/amzn2023.spec.template
 %cargo_vendor_manifest
+
+%prep
+%autosetup -n mountpoint-s3
+%cargo_prep -v vendor
 
 %install
 mkdir -p %{buildroot}/opt/aws/mountpoint-s3/bin
 mkdir -p %{buildroot}/%{_prefix}/sbin
 mkdir -p %{buildroot}/%{_bindir}
 install -m 755 target/release/mount-s3 %{buildroot}/opt/aws/mountpoint-s3/bin/mount-s3
-install -m 644 NOTICE %{buildroot}/opt/aws/mountpoint-s3/
-install -m 644 LICENSE %{buildroot}/opt/aws/mountpoint-s3/
-install -m 644 THIRD_PARTY_LICENSES %{buildroot}/opt/aws/mountpoint-s3/
+install -m 644 %{SOURCE2} %{buildroot}/opt/aws/mountpoint-s3/NOTICE
+install -m 644 %{SOURCE1} %{buildroot}/opt/aws/mountpoint-s3/LICENSE
+install -m 644 %{SOURCE3} %{buildroot}/opt/aws/mountpoint-s3/THIRD_PARTY_LICENSES
 install -m 644 cargo-vendor.txt %{buildroot}/opt/aws/mountpoint-s3/
-echo "%{version}" > %{buildroot}/opt/aws/mountpoint-s3/VERSION
+echo "1.21.0" > %{buildroot}/opt/aws/mountpoint-s3/VERSION
 ln -sf /opt/aws/mountpoint-s3/bin/mount-s3 %{buildroot}/%{_bindir}/mount-s3
 ln -sf /opt/aws/mountpoint-s3/bin/mount-s3 %{buildroot}/%{_prefix}/sbin/mount.mount-s3
 
@@ -111,12 +100,6 @@ ln -sf /opt/aws/mountpoint-s3/bin/mount-s3 %{buildroot}/%{_prefix}/sbin/mount.mo
 %attr(755,root,root) %{_prefix}/sbin/mount.mount-s3
 
 %changelog
-<<<<<<<< HEAD:amzn2023-packaging.spec
-* Thu Oct 02 2025 Mountpoint-S3 Team <s3-opensource@amazon.com> - 1.21.0.amzn2023
-- 1.21.0 amzn2023 Release
-- Refer to https://github.com/awslabs/mountpoint-s3/blob/main/mountpoint-s3/CHANGELOG.md
-========
 * Thu Oct 16 2025 Mountpoint-S3 Team <s3-opensource@amazon.com> - amzn2023
-- Initial packaging of Mountpoint-S3 into AL2023
-- Refer to https://github.com/awslabs/mountpoint-s3/blob/main/mountpoint-s3/CHANGELOG.md for updates
->>>>>>>> b1b7dee (Addressign comments):package/spec/templates/amzn2023.spec.template
+- Mountpoint-S3 amzn2023 release
+- Refer to https://github.com/awslabs/mountpoint-s3/blob/main/mountpoint-s3/CHANGELOG.md
