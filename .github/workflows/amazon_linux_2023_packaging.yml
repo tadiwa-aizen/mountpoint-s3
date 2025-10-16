@@ -66,13 +66,12 @@ jobs:
       run: |
         rpmdev-setuptree
         uv run --directory package python generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
-        cat << EOF >> $GITHUB_STEP_SUMMARY
-        ## Generated Amazon Linux 2023 Spec File
-
-        ```spec
-        $(cat ~/rpmbuild/SPECS/amzn2023.spec)
-        ```
-        EOF
+        echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo '```spec' >> $GITHUB_STEP_SUMMARY
+        cat ~/rpmbuild/SPECS/amzn2023.spec >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Build source tarball and SRPM
       run: |
