@@ -78,7 +78,7 @@ wheels = [
 ]
 
 [[package]]
-name = "mountpoint-s3-packaging"
+name = "mountpoint-s3-spec-generator"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
