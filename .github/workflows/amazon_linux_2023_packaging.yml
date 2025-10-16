@@ -65,8 +65,7 @@ jobs:
     - name: Generate Amazon Linux 2023 spec file
       run: |
         rpmdev-setuptree
-        cd package 
-        uv run python generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
+        uv run --directory package python generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
         echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo '```spec' >> $GITHUB_STEP_SUMMARY
