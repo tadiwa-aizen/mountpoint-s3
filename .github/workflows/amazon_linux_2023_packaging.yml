@@ -19,42 +19,23 @@ env:
   TEST_PREFIX: "github-actions-tmp/run-${{ github.run_id }}/rpm-test/"
 
 jobs:
-  al2023-package-test:
-    name: Amazon Linux 2023 RPM Build and Test
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix:
-        include:
-          - arch: x86_64
-            runner: ubuntu-latest
-            mock_config: amazonlinux-2023-x86_64
-          - arch: aarch64  
-            runner: [self-hosted, linux, arm64]
-            mock_config: amazonlinux-2023-aarch64
-
+  build-srpm:
+    name: Build Source RPM
+    runs-on: ubuntu-latest
     container:
       image: amazonlinux:2023
-      options: --privileged
+
+    outputs:
+      version: ${{ steps.build-srpm.outputs.version }}
 
     steps:
     - name: Install build tools and dependencies
       run: |
-        dnf -y install git rpm-build rpmdevtools make mock ca-certificates rust cargo sudo awscli
+        dnf -y install git rpm-build rpmdevtools rust cargo
         cargo install cargo-about
 
     - name: Install uv
       uses: astral-sh/setup-uv@v7
-
-    - name: Preventing container PAM sudo errors
-      run: |
-        # https://github.com/geerlingguy/docker-rockylinux9-ansible/issues/6
-        chmod 0400 /etc/shadow 
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v5
-      with:
-        role-to-assume: ${{ vars.ACTIONS_IAM_ROLE }}
-        aws-region: ${{ vars.S3_REGION }}
 
     - name: Checkout code
       uses: actions/checkout@v5
@@ -74,6 +55,7 @@ jobs:
         echo '```' >> $GITHUB_STEP_SUMMARY
 
     - name: Build source tarball and SRPM
+      id: build-srpm
       run: |
         VERSION=$(awk '/^Version:/ {print $2}' ~/rpmbuild/SPECS/amzn2023.spec)
         cargo vendor
@@ -84,14 +66,63 @@ jobs:
         tar -czf "mountpoint-s3-${VERSION}.tar.gz" mountpoint-s3
         cp "mountpoint-s3-${VERSION}.tar.gz" ~/rpmbuild/SOURCES/
         rpmbuild -bs ~/rpmbuild/SPECS/amzn2023.spec
-        echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+        echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+    - name: Upload SRPM artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: srpm-package
+        path: ~/rpmbuild/SRPMS/mount-s3-*.src.rpm
+        retention-days: 1
+
+  test-rpm:
+    name: Test RPM on ${{ matrix.arch }}
+    needs: build-srpm
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+            mock_config: amazonlinux-2023-x86_64
+          - arch: aarch64  
+            runner: [self-hosted, linux, arm64]
+            mock_config: amazonlinux-2023-aarch64
+
+    container:
+      image: amazonlinux:2023
+      options: --privileged
+
+    steps:
+    - name: Install build tools and dependencies
+      run: |
+        dnf -y install make mock ca-certificates sudo awscli
+
+    - name: Preventing container PAM sudo errors
+      run: |
+        # https://github.com/geerlingguy/docker-rockylinux9-ansible/issues/6
+        chmod 0400 /etc/shadow 
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v5
+      with:
+        role-to-assume: ${{ vars.ACTIONS_IAM_ROLE }}
+        aws-region: ${{ vars.S3_REGION }}
+
+    - name: Download SRPM artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: srpm-package
+        path: /tmp/srpms
 
     - name: Test RPM build with Mock in Amazon Linux 2023 chroot
       run: |
-        sudo mock -r ${{ matrix.mock_config }} --rebuild ~/rpmbuild/SRPMS/mount-s3-${VERSION}-amzn2023.src.rpm
+        VERSION="${{ needs.build-srpm.outputs.version }}"
+        sudo mock -r ${{ matrix.mock_config }} --rebuild /tmp/srpms/mount-s3-${VERSION}-amzn2023.src.rpm
 
     - name: Test RPM installation
       run: |
+        VERSION="${{ needs.build-srpm.outputs.version }}"
         dnf -y install /var/lib/mock/${{ matrix.mock_config }}/result/mount-s3-${VERSION}-amzn2023.${{ matrix.arch }}.rpm
         which mount-s3
         mount-s3 --version
