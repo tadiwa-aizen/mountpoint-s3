@@ -1,10 +1,7 @@
 name: AL2023 RPM Build Tests
 
 on:
-  pull_request:
-    branches: [ "main" ]
-  push:
-    branches: [ "main" ]
+  pull_request_target:
 
 permissions:
   id-token: write
@@ -47,7 +44,7 @@ jobs:
       id: build-srpm
       run: |
         chmod +x package/create_al2023_srpm.sh
-        ./package/create_al2023_srpm.sh
+        ./package/create_amzn2023_srpm.sh
         
         echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
@@ -67,15 +64,16 @@ jobs:
     name: Test RPM on ${{ matrix.arch }}
     needs: build-srpm
     runs-on: ${{ matrix.runner }}
+
+    environment: PR packaging tests
+    
     strategy:
       matrix:
         include:
           - arch: x86_64
             runner: ubuntu-latest
-            mock_config: amazonlinux-2023-x86_64
           - arch: aarch64  
             runner: [self-hosted, linux, arm64]
-            mock_config: amazonlinux-2023-aarch64
 
     container:
       image: amazonlinux:2023
@@ -106,12 +104,12 @@ jobs:
     - name: Test RPM build with Mock in Amazon Linux 2023 chroot
       run: |
         VERSION="${{ needs.build-srpm.outputs.version }}"
-        sudo mock -r ${{ matrix.mock_config }} --rebuild /tmp/srpms/mount-s3-${VERSION}-amzn2023.src.rpm
+        sudo mock -r amazonlinux-2023-${{ matrix.arch }} --rebuild /tmp/srpms/mount-s3-${VERSION}-amzn2023.src.rpm
 
     - name: Test RPM installation
       run: |
         VERSION="${{ needs.build-srpm.outputs.version }}"
-        dnf -y install /var/lib/mock/${{ matrix.mock_config }}/result/mount-s3-${VERSION}-amzn2023.${{ matrix.arch }}.rpm
+        dnf -y install /var/lib/mock/amazonlinux-2023-${{ matrix.arch }}/result/mount-s3-${VERSION}-amzn2023.${{ matrix.arch }}.rpm
         which mount-s3
         mount-s3 --version
         mount-s3 --help
