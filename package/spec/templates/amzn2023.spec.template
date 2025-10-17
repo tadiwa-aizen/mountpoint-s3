@@ -55,7 +55,7 @@ interface.
 %prep
 %autosetup -n mountpoint-s3
 
-sed -i 's/-O0 -fwrapv -Wp,-U_FORTIFY_SOURCE/-O0 -fwrapv -Wno-error=cpp -Wp,-U_FORTIFY_SOURCE/' mountpoint-s3-crt-sys/crt/aws-lc/third_party/jitterentropy/CMakeLists.txt
+sed -i 's/-Wp,-U_FORTIFY_SOURCE"/-Wp,-U_FORTIFY_SOURCE -Wno-error=cpp"/' mountpoint-s3-crt-sys/crt/aws-lc/third_party/jitterentropy/CMakeLists.txt
 
 %cargo_prep -v vendor
 
