@@ -129,7 +129,6 @@ jobs:
   
         sudo umount /mnt/s3-test
         
-
     - name: Cleanup test resources
       if: always()
       run: |
