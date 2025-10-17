@@ -57,7 +57,7 @@ interface.
 %cargo_prep -v vendor
 
 %build
-export CFLAGS="${CFLAGS:-%{optflags}} -O2 -Wno-error=cpp -Wp,-D_FORTIFY_SOURCE=1"
+export CFLAGS="${CFLAGS:-%{optflags}} -O2 -Wno-error=cpp -Wno-error=macro-redefined -Wp,-D_FORTIFY_SOURCE=1"
 export CMAKE_C_FLAGS="$CFLAGS"
 
 export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
