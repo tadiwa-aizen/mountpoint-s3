@@ -57,9 +57,13 @@ interface.
 %cargo_prep -v vendor
 
 %build
-export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -Wno-error=cpp -D_FORTIFY_SOURCE=2"
-export CMAKE_C_FLAGS="$CFLAGS"
+# 1. Remove the default _FORTIFY_SOURCE definition from optflags entirely.
+export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -Wno-error=cpp"
 
+# 2. Explicitly add back -D_FORTIFY_SOURCE=2 for CMake’s feature tests to pass.
+export CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2"
+
+export CMAKE_C_FLAGS="$CFLAGS"
 export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
 
 cargo build --release --bin mount-s3
