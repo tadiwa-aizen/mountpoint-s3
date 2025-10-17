@@ -65,7 +65,7 @@ jobs:
     needs: build-srpm
     runs-on: ${{ matrix.runner }}
 
-    environment: PR packaging tests
+    environment: PR integration tests
     
     strategy:
       matrix:
@@ -128,6 +128,18 @@ jobs:
         aws s3 cp "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}write-test.txt" - | grep -q "Hello from RPM write test"
   
         sudo umount /mnt/s3-test
+
+    - name: Show Mock build logs on failure
+      if: failure()
+      run: |
+        echo "=== Mock build.log ==="
+        cat /var/lib/mock/amazonlinux-2023-${{ matrix.arch }}/result/build.log || echo "No build.log found"
+        
+        echo "=== Mock root.log ==="
+        cat /var/lib/mock/amazonlinux-2023-${{ matrix.arch }}/result/root.log || echo "No root.log found"
+        
+        echo "=== Available files in result directory ==="
+        ls -la /var/lib/mock/amazonlinux-2023-${{ matrix.arch }}/result/ || echo "Result directory not found"
 
     - name: Cleanup test resources
       if: always()
