@@ -3,7 +3,6 @@ name: AL2023 RPM Build Tests
 on:
   pull_request_target:
 
-
 permissions:
   id-token: write
   contents: read
