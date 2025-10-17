@@ -54,11 +54,19 @@ interface.
 
 %prep
 %autosetup -n mountpoint-s3
+
+sed -i 's/-O0 -fwrapv -Wp,-U_FORTIFY_SOURCE/-O0 -fwrapv -Wno-error=cpp -Wp,-U_FORTIFY_SOURCE/' mountpoint-s3-crt-sys/crt/aws-lc/third_party/jitterentropy/CMakeLists.txt
+
 %cargo_prep -v vendor
 
 %build
-# Disable _FORTIFY_SOURCE for AWS-LC’s jitterentropy by undefining it and silencing the warning
-export AWS_LC_SYS_CFLAGS="-U_FORTIFY_SOURCE -Wno-error=cpp"
+# 1. Remove the default _FORTIFY_SOURCE definition from optflags entirely.
+export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -Wno-error=cpp"
+
+# 2. Explicitly add back -D_FORTIFY_SOURCE=2 for CMake’s feature tests to pass.
+export CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2"
+
+export CMAKE_C_FLAGS="$CFLAGS"
 export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
 
 cargo build --release --bin mount-s3
