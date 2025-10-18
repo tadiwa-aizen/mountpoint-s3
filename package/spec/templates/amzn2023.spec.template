@@ -62,8 +62,8 @@ interface.
 # Jitterentropy requires -O0 (no optimization) but FORTIFY_SOURCE requires optimization
 # Let AWS's jitterentropy CMakeLists.txt handle FORTIFY_SOURCE with -Wp,-U_FORTIFY_SOURCE
 export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -Wno-error=cpp"
-
-export CMAKE_C_FLAGS="$CFLAGS"
+# Use multiple approaches to suppress FORTIFY_SOURCE warnings
+export CFLAGS="$CFLAGS -Wno-cpp -Wno-error"
 export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
 
 cargo build --release --bin mount-s3
