@@ -55,25 +55,13 @@ interface.
 %prep
 %autosetup -n mountpoint-s3
 
-echo "=== JITTERENTROPY CMAKELIST before SED ==="
-cat mountpoint-s3-crt-sys/crt/aws-lc/third_party/jitterentropy/CMakeLists.txt 
-echo "========================================="
-
-sed -i 's/-Wp,-U_FORTIFY_SOURCE/-D_FORTIFY_SOURCE=0/' mountpoint-s3-crt-sys/crt/aws-lc/third_party/jitterentropy/CMakeLists.txt
-
-echo "=== JITTERENTROPY CMAKELIST AFTER SED ==="
-cat mountpoint-s3-crt-sys/crt/aws-lc/third_party/jitterentropy/CMakeLists.txt 
-echo "========================================="
-
-
 %cargo_prep -v vendor
 
 %build
-# 1. Remove the default _FORTIFY_SOURCE definition from optflags entirely.
+# Remove RPM's FORTIFY_SOURCE definition to avoid conflicts with jitterentropy
+# Jitterentropy requires -O0 (no optimization) but FORTIFY_SOURCE requires optimization
+# Let AWS's jitterentropy CMakeLists.txt handle FORTIFY_SOURCE with -Wp,-U_FORTIFY_SOURCE
 export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -Wno-error=cpp"
-
-# 2. Explicitly add back -D_FORTIFY_SOURCE=2 for CMake’s feature tests to pass.
-export CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2"
 
 export CMAKE_C_FLAGS="$CFLAGS"
 export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
