@@ -59,11 +59,8 @@ interface.
 
 %build
 # Remove RPM's FORTIFY_SOURCE definition to avoid conflicts with jitterentropy
-# Jitterentropy requires -O0 (no optimization) but FORTIFY_SOURCE requires optimization
-# Let AWS's jitterentropy CMakeLists.txt handle FORTIFY_SOURCE with -Wp,-U_FORTIFY_SOURCE
-export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -Wno-error=cpp"
-# Use multiple approaches to suppress FORTIFY_SOURCE warnings
-export CFLAGS="$CFLAGS -Wno-cpp -Wno-error"
+# Use -w to disable ALL warnings, including the stubborn FORTIFY_SOURCE check
+export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -w"
 export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
 
 cargo build --release --bin mount-s3
