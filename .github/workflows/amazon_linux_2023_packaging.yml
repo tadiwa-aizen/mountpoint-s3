@@ -43,8 +43,8 @@ jobs:
     - name: Create SRPM
       id: build-srpm
       run: |
-        chmod +x package/spec/generate_amzn2023_srpm.sh
-        ./package/spec/generate_amzn2023_srpm.sh
+        chmod +x package/generate_amzn2023_srpm.sh
+        ./package/generate_amzn2023_srpm.sh
         
         echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
@@ -132,5 +132,14 @@ jobs:
     - name: Cleanup test resources
       if: always()
       run: |
+        echo "=== Mock build.log ==="
+        cat /var/lib/mock/amazonlinux-2023-${{ matrix.arch }}/result/build.log || echo "No build.log found"
+        
+        echo "=== Mock root.log ==="
+        cat /var/lib/mock/amazonlinux-2023-${{ matrix.arch }}/result/root.log || echo "No root.log found"
+        
+        echo "=== Available files in result directory ==="
+        ls -la /var/lib/mock/amazonlinux-2023-${{ matrix.arch }}/result/ || echo "Result directory not found"
+        
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}test.txt"
         aws s3 rm "s3://${S3_BUCKET_NAME}/${TEST_PREFIX}write-test.txt"
