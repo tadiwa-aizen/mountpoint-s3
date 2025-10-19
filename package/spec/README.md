@@ -32,10 +32,8 @@ You can use custom templates and output files:
 
     uv run python generate_spec.py amzn2023 --template custom.spec.template --output my-package.spec
 
-## Building AL2023 SRPM
+## Integration
 
-For a complete AL2023 SRPM build, use the build script from the parent directory:
+This tool is used by the parent directory's `generate_amzn2023_srpm.sh` script for complete SRPM builds.
 
-    ../generate_amzn2023_srpm.sh
 
-This script will generate the spec file, create source tarball, and build the SRPM package.
