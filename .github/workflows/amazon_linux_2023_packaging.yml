@@ -43,8 +43,8 @@ jobs:
     - name: Create SRPM
       id: build-srpm
       run: |
-        chmod +x package/create_amzn2023_srpm.sh
-        ./package/create_amzn2023_srpm.sh
+        chmod +x package/spec/generate_amzn2023_srpm.sh
+        ./package/spec/generate_amzn2023_srpm.sh
         
         echo "## Generated Amazon Linux 2023 Spec File" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
