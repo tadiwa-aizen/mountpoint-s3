@@ -60,7 +60,8 @@ interface.
 %build
 # Remove RPM's FORTIFY_SOURCE definition to avoid conflicts with jitterentropy
 # Use -w to disable ALL warnings, including the stubborn FORTIFY_SOURCE check
-export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -w"
+# export CFLAGS="$(echo '%{optflags}' | sed 's/-Wp,-D_FORTIFY_SOURCE=[0-9]//g') -O2 -w"
+export CFLAGS="%{optflags} -O2 -w" 
 export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
 
 cargo build --release --bin mount-s3
