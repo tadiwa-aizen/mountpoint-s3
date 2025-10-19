@@ -31,9 +31,3 @@ Generate a spec file for a target distribution:
 You can use custom templates and output files:
 
     uv run python generate_spec.py amzn2023 --template custom.spec.template --output my-package.spec
-
-## Integration
-
-This tool is used by the parent directory's `generate_amzn2023_srpm.sh` script for complete SRPM builds.
-
-
