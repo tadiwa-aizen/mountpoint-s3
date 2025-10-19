@@ -15,7 +15,7 @@ cargo about generate --config package/attribution.toml --output-file ~/rpmbuild/
 cp LICENSE NOTICE ~/rpmbuild/SOURCES/
 
 # Create source tarball
-cd ../.. 
+cd ..
 tar -czf "mountpoint-s3-${VERSION}.tar.gz" mountpoint-s3
 cp "mountpoint-s3-${VERSION}.tar.gz" ~/rpmbuild/SOURCES/
 
