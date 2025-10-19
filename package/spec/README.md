@@ -1,38 +1,41 @@
-# Mountpoint-S3 Package Spec
+# Building Mountpoint RPM spec files
 
-This directory contains the packaging specifications and tools for building Mountpoint-S3 RPM packages.
+This directory contains the infrastructure to generate RPM spec files for different Linux distributions. It creates distribution-specific `.spec` files by extracting version information from the project and rendering templates.
 
 ## Contents
 
-- `generate_spec.py` - Python script to generate distribution-specific RPM spec files
-- `templates/` - Jinja2 template files for different distributions
-- `pyproject.toml` - Python configuration
+- `generate_spec.py` - Python script that generates distribution-specific RPM spec files
+- `templates/` - template files for different distributions
+  - `amzn2023.spec.template` - Amazon Linux 2023 RPM spec template
+- `pyproject.toml` - Python project configuration with dependencies
 
-## How it Works
+## How it works
 
-The `generate_spec.py` script creates RPM spec files by:
+The spec generator automatically:
 
-1. **Extracting versions** from project files:
+1. **Extracts versions** from project files:
    - Package version from `mountpoint-s3/Cargo.toml`
    - Rust toolchain version from `rust-toolchain.toml`
-   - Git submodule versions for bundled libraries
+   - Git submodule versions for bundled library declarations
 
-2. **Rendering templates** using the extracted version data
+2. **Renders templates** with the extracted version data
 
-3. **Outputting** a complete `.spec` file ready for `rpmbuild`
+3. **Outputs** complete `.spec` files ready for `rpmbuild`
 
-## Usage
+## Building spec files
 
 Generate a spec file for a target distribution:
-```bash
-python generate_spec.py <build_target>
-```
 
-Examples:
-```bash
-# Generate amzn2023.spec from templates/amzn2023.spec.template
-python generate_spec.py amzn2023
+    uv run python generate_spec.py amzn2023 --output ~/rpmbuild/SPECS/amzn2023.spec
 
-# Use custom template and output file
-python generate_spec.py amzn2023 --template custom.spec.template --output my-package.spec
-```
+You can use custom templates and output files:
+
+    uv run python generate_spec.py amzn2023 --template custom.spec.template --output my-package.spec
+
+## Building AL2023 SRPM
+
+For a complete AL2023 SRPM build, use the build script from the parent directory:
+
+    ../generate_amzn2023_srpm.sh
+
+This script will generate the spec file, create source tarball, and build the SRPM package.
