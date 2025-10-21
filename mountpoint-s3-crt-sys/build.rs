@@ -258,6 +258,7 @@ fn compile_crt(output_dir: &Path) -> PathBuf {
             if get_env("MOUNTPOINT_S3_DISABLE_JITTER_ENTROPY").is_some() {
                 builder.define("DISABLE_CPU_JITTER_ENTROPY", "ON");
             }
+            builder.define("ENABLE_SOURCE_MODIFICATION", "OFF");
         }
 
         // Force compiler optimizations for aws-checksums even in debug builds to improve throughput
