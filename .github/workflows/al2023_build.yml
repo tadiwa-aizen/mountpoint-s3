@@ -2,6 +2,9 @@ name: AL2023 RPM Build Tests
 
 on:
   pull_request_target:
+  push:
+    branches:
+      - "wf-changes/**"
 
 permissions:
   id-token: write

@@ -58,6 +58,7 @@ interface.
 
 %build
 export CFLAGS="%{optflags} -Wno-error=cpp"
+export MOUNTPOINT_S3_DISABLE_JITTER_ENTROPY="1"
 export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
 
 cargo build --release --bin mount-s3
