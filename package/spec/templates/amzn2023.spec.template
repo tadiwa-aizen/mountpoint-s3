@@ -75,8 +75,6 @@ install -m 755 target/release/mount-s3 %{buildroot}/%{_bindir}/mount-s3
 install -m 644 %{SOURCE4} %{buildroot}/%{_docdir}/%{name}/NOTICE
 install -m 644 %{SOURCE3} %{buildroot}/%{_licensedir}/%{name}/LICENSE
 install -m 644 %{SOURCE5} %{buildroot}/%{_licensedir}/%{name}/THIRD_PARTY_LICENSES
-install -m 644 LICENSE.dependencies %{buildroot}/LICENSE.dependencies
-install -m 644 cargo-vendor.txt %{buildroot}/cargo-vendor.txt
 ln -sf %{_bindir}/mount-s3 %{buildroot}/%{_prefix}/sbin/mount.mount-s3
 
 %files
