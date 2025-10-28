@@ -62,6 +62,8 @@ export MOUNTPOINT_S3_AWS_RELEASE_TARGET="amzn2023"
 
 cargo build --release --bin mount-s3
 
+%cargo_license_summary
+%{cargo_license} > LICENSE.dependencies
 %cargo_vendor_manifest
 
 %install
