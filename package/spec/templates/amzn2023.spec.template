@@ -75,8 +75,8 @@ install -m 755 target/release/mount-s3 %{buildroot}/%{_bindir}/mount-s3
 install -m 644 %{SOURCE4} %{buildroot}/%{_docdir}/%{name}/NOTICE
 install -m 644 %{SOURCE3} %{buildroot}/%{_licensedir}/%{name}/LICENSE
 install -m 644 %{SOURCE5} %{buildroot}/%{_licensedir}/%{name}/THIRD_PARTY_LICENSES
-install -m 644 LICENSE.dependencies %{buildroot}/
-install -m 644 cargo-vendor.txt %{buildroot}/
+install -m 644 LICENSE.dependencies %{buildroot}/LICENSE.dependencies
+install -m 644 cargo-vendor.txt %{buildroot}/cargo-vendor.txt
 ln -sf %{_bindir}/mount-s3 %{buildroot}/%{_prefix}/sbin/mount.mount-s3
 
 %files
@@ -84,10 +84,10 @@ ln -sf %{_bindir}/mount-s3 %{buildroot}/%{_prefix}/sbin/mount.mount-s3
 %{_bindir}/mount-s3
 %{_prefix}/sbin/mount.mount-s3
 %doc %{_docdir}/%{name}/NOTICE
-%license LICENSE.dependencies
-%license cargo-vendor.txt
 %license %{_licensedir}/%{name}/LICENSE
 %license %{_licensedir}/%{name}/THIRD_PARTY_LICENSES
+%license LICENSE.dependencies
+%license cargo-vendor.txt
 
 %changelog
 * Thu Oct 16 2025 Mountpoint-S3 Team <mountpoint-s3@amazon.com> - amzn2023
