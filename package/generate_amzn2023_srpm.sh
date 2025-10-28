@@ -13,6 +13,10 @@ uv run --directory package/spec python generate_spec.py amzn2023 --output ~/rpmb
 VERSION=$(awk '/^Version:/ {print $2}' ~/rpmbuild/SPECS/amzn2023.spec)
 
 cargo vendor
+tar -czf "mountpoint-s3-${VERSION}-vendor.tar.gz" vendor
+mv mountpoint-s3-${VERSION}-vendor.tar.gz ~/rpmbuild/SOURCES/
+rm -rf vendor
+
 cargo about generate --config package/attribution.toml --output-file ~/rpmbuild/SOURCES/THIRD_PARTY_LICENSES package/attribution.hbs
 cp LICENSE NOTICE ~/rpmbuild/SOURCES/
 
