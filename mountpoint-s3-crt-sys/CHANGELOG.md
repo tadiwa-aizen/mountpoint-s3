@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Update to latest CRT dependencies. Includes `aws-lc` upgrade from v1.69.0 to v1.72.0, addressing CVE-2026-4428.
+
 ## v0.16.2 (March 20, 2026)
 
 * Update to latest CRT dependencies.
