@@ -5,6 +5,8 @@ To avoid new changes introducing performance regressions, we run a performance b
 
 ### Workloads
 
+TEST
+
 ***read workload*** - we measure two aspects of the read operation, throughput (with and without caching enabled) and latency. For the first part, we use fio to simulate IO workloads for sequential read or random read for a specific duration then measure their throughput. On the latency side, we are using time to first byte as data points by running workloads that read one byte off of existing files on Mountpoint and measure the time it takes to complete the operation. Each of the test is defined in a separate .fio file, and the file name indicates what is the test case for that file, for example `seq_read.fio` is the benchmark for sequential read. All of fio configuration files can be found at path [mountpoint-s3/scripts/fio/read/](../mountpoint-s3/scripts/fio/read) and [mountpoint-s3/scripts/fio/read_latency/](../mountpoint-s3/scripts/fio/read_latency).
 
 In general, we run each IO operation for 30 seconds against a 100 GiB file. But there are some variants in configuration where we also want to test to see how Mountpoint would perform with these configurations. Here is the list of all the variants we have tested.
